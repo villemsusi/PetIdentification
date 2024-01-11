@@ -46,7 +46,6 @@ def predict(target, inp, wrapped_model):
     global class_names
     print(inp)
     test_img = inp.convert("RGB")
-    test_img.show()
     
     target_cls = target
 
