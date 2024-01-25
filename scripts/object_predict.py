@@ -40,7 +40,7 @@ class InferenceWrapper(nn.Module):
 def predict(target, inp, wrapped_model):
     global class_map
     global class_names
-    print(inp)
+    
     test_img = inp.convert("RGB")
     
     target_cls = target
@@ -61,12 +61,12 @@ def predict(target, inp, wrapped_model):
         "Target": target_cls,
         "Predicted": pred_class,
         "Confidence Score": round(confidence_score.item(), 4),
-        "Model": wrapped_model.model.name,
     })
     return pred_data
     
 
 def inference(cp, img, label):
+    
     source_dir = str(Path(__file__).resolve().parent.parent)
     cp_path = source_dir+"/"+cp
 
@@ -75,10 +75,10 @@ def inference(cp, img, label):
     dtype = torch.float32
     
     global class_names
-    class_names = ['Abyssinian', 'american_bulldog', 'american_pit_bull_terrier', 'basset_hound', 'beagle', 'Bengal', 'Birman', 'Bombay', 'boxer', 'British_Shorthair', 'chihuahua', 'Egyptian_Mau', 'english_cocker_spaniel', 'english_setter', 'german_shorthaired', 'great_pyrenees', 'havanese', 'japanese_chin', 'keeshond', 'leonberger', 'Maine_Coon', 'miniature_pinscher', 'newfoundland', 'Persian', 'pomeranian', 'pug', 'Ragdoll', 'Russian_Blue', 'saint_bernard', 'samoyed', 'scottish_terrier', 'shiba_inu', 'Siamese', 'Sphynx', 'staffordshire_bull_terrier', 'wheaten_terrier', 'yorkshire_terrier']
     global class_map
-    class_map = {'Abyssinian':'Abyssinian', 'english_cocker_spaniel':'american_bulldog', 'english_setter':'american_pit_bull_terrier', 'german_shorthaired':'basset_hound', 'great_pyrenees':'beagle', 'american_bulldog':'Bengal', 'american_pit_bull_terrier':'Birman', 'basset_hound':'Bombay', 'havanese':'boxer', 'beagle':'British_Shorthair', 'japanese_chin':'chihuahua', 'Bengal':'Egyptian_Mau', 'keeshond':'english_cocker_spaniel', 'leonberger':'english_setter', 'Maine_Coon':'german_shorthaired', 'miniature_pinscher':'great_pyrenees', 'newfoundland':'havanese', 'Persian':'japanese_chin', 'pomeranian':'keeshond', 'pug':'leonberger', 'Birman':'Maine_Coon', 'Ragdoll':'miniature_pinscher', 'Russian_Blue':'newfoundland', 'Bombay':'Persian', 'saint_bernard':'pomeranian', 'samoyed':'pug', 'boxer':'Ragdoll', 'British_Shorthair':'Russian_Blue', 'scottish_terrier':'saint_bernard', 'shiba_inu':'samoyed', 'Siamese':'scottish_terrier', 'Sphynx':'shiba_inu', 'chihuahua':'Siamese', 'Egyptian_Mau':'Sphynx', 'staffordshire_bull_terrier':'staffordshire_bull_terrier', 'wheaten_terrier':'wheaten_terrier', 'yorkshire_terrier':'yorkshire_terrier'}
-
+   
+    class_names = ['Correct', 'Incorrect']
+    class_map = {'Correct':'Correct', 'Incorrect':'Incorrect'}
 
     model_name = "efficientnet_b0.ra_in1k"
 

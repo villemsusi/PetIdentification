@@ -1,1 +1,13 @@
+# YOLO model
 yolov5s.pt
+
+# Test images
+test_correct/
+test_incorrect/
+
+# Train images
+images/
+images.tar.gz
+
+# Python environment
+env/
