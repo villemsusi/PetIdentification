@@ -2,8 +2,8 @@
 yolov5s.pt
 
 # Test images
-test_correct/
-test_incorrect/
+#test_correct/
+#test_incorrect/
 
 # Train images
 images/
