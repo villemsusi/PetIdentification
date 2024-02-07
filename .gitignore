@@ -6,7 +6,7 @@ yolov5s.pt
 #test_incorrect/
 
 # Train images
-images/
+#images/
 images.tar.gz
 
 # Python environment
