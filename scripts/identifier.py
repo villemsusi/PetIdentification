@@ -1,6 +1,6 @@
 from object_detect import detect, camera_detect, setup_model
 from object_predict import inference
-from camera_capture import camera_setup, capture
+from cam import camera_setup, capture
 
 import os
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         while True:
             input("Press ENTER to analyse")
             image = camera_detect(capture(cam), model)
-            res = inference("efficientnet_base.pth", image, "cat")
+            res = inference("efficientnet_6_3_2.pth", image, "Correct")
             print(res)
     if mode == "f":
         for i in ["Incorrect", "Correct"]:
