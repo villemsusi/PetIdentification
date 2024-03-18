@@ -68,7 +68,7 @@ def predict(target, inp, wrapped_model):
 def inference(cp, img, label):
     
     source_dir = str(Path(__file__).resolve().parent.parent)
-    cp_path = source_dir+"/"+cp
+    cp_path = source_dir+"/models/"+cp
 
     global device
     device = 'cpu'

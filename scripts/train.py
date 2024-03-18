@@ -24,7 +24,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from torch.amp import autocast
 from torch.cuda.amp import GradScaler
-from torcheval.metrics import BinaryAccuracy
+from torcheval.metrics import BinaryAccuracy, MulticlassAccuracy, BinaryNormalizedEntropy
 from torchvision import transforms
 import torchvision.transforms.functional as TF
 import torchvision.transforms as T
@@ -72,8 +72,8 @@ class ImageDataset(Dataset):
         """
         sample = self.dataset[idx]
         image = sample['image'].convert("RGB")
-        label = sample['label']
-        return self.tfms(image), label
+        #label = sample['label']
+        return self.tfms(image)#, label
 class ResizePad(nn.Module):
     def __init__(self, max_sz=256, padding_mode='edge'):
         """
@@ -143,15 +143,18 @@ def run_epoch(model, dataloader, optimizer, metric, lr_scheduler, device, scaler
     metric.reset()
     epoch_loss = 0
     progress_bar = tqdm(total=len(dataloader), desc="Train" if is_training else "Eval")
-    
-    for batch_id, (inputs, targets) in enumerate(dataloader):
-        inputs, targets = inputs.to(device), targets.to(device)
+
+    for batch_id, sample in enumerate(dataloader):
+        inputs = sample
+        inputs = inputs.to(device)
+        targets = torch.tensor([[0] for _ in inputs])
+        targets = targets.to(device)
+        print(targets.shape)
         
         with torch.set_grad_enabled(is_training):
             with autocast(device):
                 outputs = model(inputs)
-                loss = torch.nn.functional.cross_entropy(outputs, targets)
-        
+                loss = torch.nn.functional.cross_entropy(outputs, targets.float())
         metric.update(outputs.detach().cpu(), targets.detach().cpu())
         
         if is_training:
@@ -218,12 +221,18 @@ def train_loop(model, train_dataloader, valid_dataloader, optimizer, metric, lr_
         torch.cuda.empty_cache()
 
 def model_train(mod):
-    model = timm.create_model(mod, pretrained=True, num_classes=len(class_names))
+    model_name = "efficientnet_b0.ra_in1k"
+
+    model = timm.create_model(model_name, pretrained=True, num_classes=1)
     model = model.to(device=device, dtype=dtype)
     model.device = device
-    model.name = mod
+    model.name = model_name
     model.labels = class_names
-
+    #model.load_state_dict(torch.load(source_dir+"/"+mod, map_location=torch.device("cpu")))
+    
+    #num_in_features = model.classifier.in_features
+    #model.classifier = nn.Sigmoid()
+    #print(model.classifier)
     bs = 64
 
     data_loader_params = {
@@ -252,15 +261,16 @@ def model_train(mod):
     lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, 
                                                     max_lr=lr, 
                                                     total_steps=epochs*len(train_dataloader))
-
     metric = BinaryAccuracy()
+
+
     use_amp = torch.cuda.is_available()
     #print(use_amp)
     train_loop(model, train_dataloader, valid_dataloader, optimizer, metric, lr_scheduler, device, epochs, use_amp, checkpoint_path)
 
 
 if __name__ == '__main__':
-    source_dir = Path(__file__).resolve().parent.parent
+    source_dir = str(Path(__file__).resolve().parent.parent)
     
     device = "cpu"
     dtype = torch.float32
@@ -293,11 +303,9 @@ if __name__ == '__main__':
     num_workers = multiprocessing.cpu_count()
 
     dataset = load_dataset("imagefolder", data_dir=f"{source_dir}/images/")
-    #print(dataset)
     train_split = dataset["train"]
     val_split = dataset["validation"]
     dataset_train = ImageDataset(dataset=train_split, classes=class_names, tfms=train_tfms)
     dataset_val = ImageDataset(dataset=val_split, classes=class_names, tfms=val_tfms)
 
-    model_train("efficientnet_b0.ra_in1k")
-
+    model_train("efficientnet_b0.ra_in1k.pth")

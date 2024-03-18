@@ -33,17 +33,27 @@ def detect(img, model):
     results = model(img)
     res = results.pandas().xyxy[0]
 
-    #print(res)
-    image = Image.fromarray(resize(img).astype('uint8'), 'RGB')
-    #img_cropped = image.crop((res.xmin[0], res.ymin[0], res.xmax[0], res.ymax[0]))
-    #image.show()
-    return image
+    images = []
+
+    image = Image.open(img)
+
+    if len(res.xmin) > 0:
+        for ind, i in enumerate(res.name):
+            if i == "cat" or i == "dog":
+                crop_img = image.crop((res.xmin[ind], res.ymin[ind], res.xmax[ind], res.ymax[ind]))
+                images.append(crop_img)
+                
+    if (len(images) == 0):
+        images.append(image)
+    return images
 
 
 def main():
+    model = setup_model()
     test_img = "test_image.jpg"
-    img = detect(test_img)
-    img.show()
+    imgs = detect(test_img, model)
+    for img in imgs:
+        img.show()
 
 
 if __name__ == "__main__":

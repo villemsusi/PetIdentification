@@ -1,0 +1,1 @@
+{"epoch": 0, "train_loss": 0.1569649078975446, "valid_loss": 0.06581890589286558, "metric_value": 0.02631578966975212, "learning_rate": 1.0371879149606898e-05, "model_architecture": "efficientnet_b0.ra_in1k"}
