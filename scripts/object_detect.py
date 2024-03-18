@@ -19,12 +19,12 @@ def camera_detect(img, model):
     results = model(img)
     res = results.pandas().xyxy[0]
 
-    #print(res)
-    image = Image.fromarray(img.astype('uint8'), 'RGB')
-    image.show()
-    img_cropped = image.crop((res.xmin[0], res.ymin[0], res.xmax[0], res.ymax[0]))
-    #img_cropped.show()
-    return img_cropped
+    if res.name[0] == "catt":
+        img_cropped = img.crop((res.xmin[0], res.ymin[0], res.xmax[0], res.ymax[0]))
+        #img_cropped.show()
+        return img_cropped
+    #img.show()
+    return img
 
 def detect(img, model):
     source_dir = Path(__file__).resolve().parent.parent
