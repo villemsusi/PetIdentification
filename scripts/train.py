@@ -2,7 +2,7 @@
 This is a modified and adapted version of the code from
 https://christianjmills.com/posts/pytorch-train-image-classifier-timm-hf-tutorial/
 '''
-
+import streamlit as st
 
 import multiprocessing
 import math
@@ -12,7 +12,6 @@ import datetime
 from typing import Dict, Tuple
 import argparse
 
-from PIL import Image
 
 import timm
 from timm.data import ImageDataset as IDataset
@@ -35,11 +34,11 @@ from torch import Tensor
 from tqdm.auto import tqdm
 
 
-parser = argparse.ArgumentParser(description="Train image classifier")
-parser.add_argument("--epochs", type=int, required=True)
+#parser = argparse.ArgumentParser(description="Train image classifier")
+#parser.add_argument("--epochs", type=int, required=True)
 
 
-args = parser.parse_args()
+#args = parser.parse_args()
 
 
 
@@ -145,17 +144,19 @@ def run_epoch(model, dataloader, optimizer, metric, lr_scheduler, device, scaler
     progress_bar = tqdm(total=len(dataloader), desc="Train" if is_training else "Eval")
 
     for batch_id, sample in enumerate(dataloader):
+
+        progressbar.progress(round(batch_id/len(dataloader)*100))
+        continue
         inputs = sample
         inputs = inputs.to(device)
         targets = torch.tensor([[0] for _ in inputs])
         targets = targets.to(device)
-        print(targets.shape)
         
         with torch.set_grad_enabled(is_training):
             with autocast(device):
                 outputs = model(inputs)
                 loss = torch.nn.functional.cross_entropy(outputs, targets.float())
-        metric.update(outputs.detach().cpu(), targets.detach().cpu())
+        metric.update(outputs.detach().cpu(), targets.reshape(-1).detach().cpu())
         
         if is_training:
             if scaler is not None:
@@ -220,56 +221,11 @@ def train_loop(model, train_dataloader, valid_dataloader, optimizer, metric, lr_
     if use_amp:
         torch.cuda.empty_cache()
 
-def model_train(mod):
-    model_name = "efficientnet_b0.ra_in1k"
+def model_train(epochs):
+    train_label = st.text("Training...")
+    global progressbar
+    progressbar = st.progress(0)
 
-    model = timm.create_model(model_name, pretrained=True, num_classes=1)
-    model = model.to(device=device, dtype=dtype)
-    model.device = device
-    model.name = model_name
-    model.labels = class_names
-    #model.load_state_dict(torch.load(source_dir+"/"+mod, map_location=torch.device("cpu")))
-    
-    #num_in_features = model.classifier.in_features
-    #model.classifier = nn.Sigmoid()
-    #print(model.classifier)
-    bs = 64
-
-    data_loader_params = {
-        'batch_size': bs,
-        'num_workers': num_workers,
-        'persistent_workers': True,
-        'pin_memory': False,
-        'pin_memory_device': device,
-    }
-
-    train_dataloader = DataLoader(dataset_train, **data_loader_params, shuffle=True)
-    valid_dataloader = DataLoader(dataset_val, **data_loader_params)
-    project_dir = f"{source_dir}/PetClassifier"
-    
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    checkpoint_dir = Path(f"{project_dir}/{timestamp}")
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    checkpoint_path = checkpoint_dir/f"{model.name}.pth"
-    #print(checkpoint_path)
-
-
-    lr = 1e-3
-    epochs = args.epochs
-
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, eps=1e-5)
-    lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, 
-                                                    max_lr=lr, 
-                                                    total_steps=epochs*len(train_dataloader))
-    metric = BinaryAccuracy()
-
-
-    use_amp = torch.cuda.is_available()
-    #print(use_amp)
-    train_loop(model, train_dataloader, valid_dataloader, optimizer, metric, lr_scheduler, device, epochs, use_amp, checkpoint_path)
-
-
-if __name__ == '__main__':
     source_dir = str(Path(__file__).resolve().parent.parent)
     
     device = "cpu"
@@ -308,4 +264,55 @@ if __name__ == '__main__':
     dataset_train = ImageDataset(dataset=train_split, classes=class_names, tfms=train_tfms)
     dataset_val = ImageDataset(dataset=val_split, classes=class_names, tfms=val_tfms)
 
-    model_train("efficientnet_b0.ra_in1k.pth")
+
+    model_name = "efficientnet_b0.ra_in1k"
+
+    model = timm.create_model(model_name, pretrained=True, num_classes=1)
+    model = model.to(device=device, dtype=dtype)
+    model.device = device
+    model.name = model_name
+    model.labels = class_names
+    #model.load_state_dict(torch.load(source_dir+"/"+mod, map_location=torch.device("cpu")))
+    
+    #num_in_features = model.classifier.in_features
+    #model.classifier = nn.Sigmoid()
+    #print(model.classifier)
+    bs = 64
+
+    data_loader_params = {
+        'batch_size': bs,
+        'num_workers': num_workers,
+        'persistent_workers': True,
+        'pin_memory': False,
+        'pin_memory_device': device,
+    }
+
+    train_dataloader = DataLoader(dataset_train, **data_loader_params, shuffle=True)
+    valid_dataloader = DataLoader(dataset_val, **data_loader_params)
+    project_dir = f"{source_dir}/PetClassifier"
+    
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    checkpoint_dir = Path(f"{project_dir}/{timestamp}")
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    checkpoint_path = checkpoint_dir/f"{model.name}.pth"
+    #print(checkpoint_path)
+
+
+    lr = 1e-3
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, eps=1e-5)
+    lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, 
+                                                    max_lr=lr, 
+                                                    total_steps=epochs*len(train_dataloader))
+    metric = MulticlassAccuracy()
+
+
+    use_amp = torch.cuda.is_available()
+    #print(use_amp)
+    train_loop(model, train_dataloader, valid_dataloader, optimizer, metric, lr_scheduler, device, epochs, use_amp, checkpoint_path)
+    progressbar.empty()
+    train_label.empty()
+
+
+if __name__ == '__main__':
+    model_train(1)    
