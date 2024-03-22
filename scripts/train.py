@@ -146,7 +146,7 @@ def run_epoch(model, dataloader, optimizer, metric, lr_scheduler, device, scaler
     for batch_id, sample in enumerate(dataloader):
 
         progressbar.progress(round(batch_id/len(dataloader)*100))
-        continue
+        
         inputs = sample
         inputs = inputs.to(device)
         targets = torch.tensor([[0] for _ in inputs])
@@ -315,4 +315,4 @@ def model_train(epochs):
 
 
 if __name__ == '__main__':
-    model_train(1)    
+    model_train(5)    
