@@ -32,20 +32,14 @@ def detect(img, model):
 
     results = model(img)
     res = results.pandas().xyxy[0]
-
-    images = []
-
     image = Image.open(img)
-
-    if len(res.xmin) > 0:
-        for ind, i in enumerate(res.name):
-            if i == "cat" or i == "dog":
-                crop_img = image.crop((res.xmin[ind], res.ymin[ind], res.xmax[ind], res.ymax[ind]))
-                images.append(crop_img)
+    
+    for i in range(len(res.name)):
+        if res.name[i] == "cat" or res.name[i] == "dog":
+            crop_img = image.crop((res.xmin[i]-10, res.ymin[i]-10, res.xmax[i]+10, res.ymax[i]+10))
                 
-    if (len(images) == 0):
-        images.append(image)
-    return images
+    #return crop_img
+    return image
 
 
 def main():

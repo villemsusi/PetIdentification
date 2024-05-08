@@ -11,7 +11,7 @@ from pathlib import Path
 import datetime
 from typing import Dict, Tuple
 import argparse
-
+from PIL import Image
 
 import timm
 from timm.data import ImageDataset as IDataset
@@ -27,6 +27,7 @@ from torcheval.metrics import BinaryAccuracy, MulticlassAccuracy, BinaryNormaliz
 from torchvision import transforms
 import torchvision.transforms.functional as TF
 import torchvision.transforms as T
+from torchvision.utils import save_image
 from torch import Tensor
 
 
@@ -144,9 +145,9 @@ def run_epoch(model, dataloader, optimizer, metric, lr_scheduler, device, scaler
     progress_bar = tqdm(total=len(dataloader), desc="Train" if is_training else "Eval")
 
     for batch_id, sample in enumerate(dataloader):
+        #save_image(sample[0], "img"+str(batch_id)+".jpg")
 
         progressbar.progress(round(batch_id/len(dataloader)*100))
-        continue
         inputs = sample
         inputs = inputs.to(device)
         targets = torch.tensor([[0] for _ in inputs])
@@ -276,7 +277,6 @@ def model_train(epochs):
     
     #num_in_features = model.classifier.in_features
     #model.classifier = nn.Sigmoid()
-    #print(model.classifier)
     bs = 64
 
     data_loader_params = {
@@ -294,7 +294,7 @@ def model_train(epochs):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     checkpoint_dir = Path(f"{project_dir}/{timestamp}")
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    checkpoint_path = checkpoint_dir/f"{model.name}.pth"
+    checkpoint_path = checkpoint_dir/f"efficientnet.pth"
     #print(checkpoint_path)
 
 
@@ -315,4 +315,4 @@ def model_train(epochs):
 
 
 if __name__ == '__main__':
-    model_train(1)    
+    model_train(3)    
