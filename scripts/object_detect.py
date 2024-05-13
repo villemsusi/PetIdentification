@@ -4,29 +4,19 @@ from pathlib import Path
 import numpy as np
 import cv2 as cv
 
-
-def resize(img_path):
-    img = cv.imread(img_path)
-    res = cv.resize(img, dsize=(640, 800), interpolation=cv.INTER_CUBIC)
-    res = cv.cvtColor(res, cv.COLOR_RGB2BGR)
-    return res
-
 def setup_model():
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
     return model
 
-def camera_detect(img, model):
+def detect(img, model):
     results = model(img)
     res = results.pandas().xyxy[0]
-
-    if res.name[0] == "catt":
-        img_cropped = img.crop((res.xmin[0], res.ymin[0], res.xmax[0], res.ymax[0]))
-        #img_cropped.show()
+    if res.name[0] == "catt" or True:
+        img_cropped = img.crop((max(0, res.xmin[0]-15), max(0, res.ymin[0]-15), res.xmax[0]+15, res.ymax[0]+15))
         return img_cropped
-    #img.show()
     return img
 
-def detect(img, model):
+def file_detect(img, model):
     source_dir = Path(__file__).resolve().parent.parent
     img = f"{source_dir}/{img}"
 
@@ -45,7 +35,7 @@ def detect(img, model):
 def main():
     model = setup_model()
     test_img = "test_image.jpg"
-    imgs = detect(test_img, model)
+    imgs = file_detect(test_img, model)
     for img in imgs:
         img.show()
 
