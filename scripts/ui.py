@@ -35,14 +35,13 @@ picam = start_cam()
 detection = detection_model()
 
 
-st.title("Pet Recognition Interface")
+st.title("Pet Recognition")
 
 tab_titles = ["Monitor", "Logs", "Train"]
 tab_monitor, tab_logs, tab_train = st.tabs(tab_titles)
 
 
 with tab_logs:
-    st.header("LOG HISTORY")
 
     amount = st.number_input("Insert Amount", value=5)
     update = st.button("Update Logs", key="log_update")
@@ -59,7 +58,6 @@ with tab_logs:
                 st.image(f"logs/{line}.jpg")
     
 with tab_train:
-    st.header("Training Mode")
     images = st.file_uploader("Upload images", accept_multiple_files=True, type=["png", "jpg", "jpeg"])
     nr_cols = 4
     cols = st.columns(nr_cols, gap="small")
@@ -67,7 +65,7 @@ with tab_train:
         with cols[ind % nr_cols]:
             cols[ind % nr_cols].image(image, use_column_width=True)
 
-    if st.button("UPLOAD", key="upload"):
+    if st.button("Upload / Train", key="upload"):
         if len(images) != 0:
             for image in images:
                 with open(os.path.join("images/train/Correct", image.name), "wb") as f:
@@ -76,7 +74,6 @@ with tab_train:
         else:
             st.markdown(''':red[Add Images!]''')
 with tab_monitor:
-    st.header("Monitoring Mode")
 
     if st.button("Detect", key="detect"):
         image = capture(picam)
@@ -86,15 +83,14 @@ with tab_monitor:
         res.save(f"logs/{_time}.jpg")
         write_logs(_time)
 
+    STREAM = st.empty()
+    while True:
+        image = capture(picam)
+        STREAM.image(image)
 
-    nr_cols = 2
-    cols = st.columns(nr_cols, gap="small")
-    with cols[0]:
-        STREAM = st.empty()
-        while True:
-            image = capture(picam)
-            STREAM.image(image)
-
+    if st.button("Send Signal", key="signal"):
+        print("Signal")
+        #Do nothing yet
 picam.close()
 
             

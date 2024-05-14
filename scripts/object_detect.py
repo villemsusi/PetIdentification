@@ -11,7 +11,7 @@ def setup_model():
 def detect(img, model):
     results = model(img)
     res = results.pandas().xyxy[0]
-    if res.name[0] == "catt" or True:
+    if len(res.name) > 0:
         img_cropped = img.crop((max(0, res.xmin[0]-15), max(0, res.ymin[0]-15), res.xmax[0]+15, res.ymax[0]+15))
         return img_cropped
     return img
