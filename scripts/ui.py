@@ -1,11 +1,11 @@
 import streamlit as st
 import os
-from datetime import datetime
-from PIL import Image
+import time
+
 
 from train import model_train
 from cam import camera_setup, capture
-from object_detect import detect, setup_model
+from scripts.detection import detect, setup_model
 
 @st.cache_resource
 def start_cam():
@@ -23,11 +23,6 @@ def read_logs(amount):
     with open("logs/capture_log.txt") as f:
         log_list = f.readlines()
     return log_list[-amount:][::-1]
-
-
-def write_logs(data):
-    with open("logs/capture_log.txt", "a") as f:
-        f.write(str(data) + "\n")
 
 
 
@@ -74,23 +69,23 @@ with tab_train:
         else:
             st.markdown(''':red[Add Images!]''')
 with tab_monitor:
-
-    if st.button("Detect", key="detect"):
-        image = capture(picam)
-        res = detect(image, detection)
-
-        _time = str(datetime.now())
-        res.save(f"logs/{_time}.jpg")
-        write_logs(_time)
-
+    
     STREAM = st.empty()
+
     while True:
+        time.sleep(2)
+
         image = capture(picam)
         STREAM.image(image)
 
-    if st.button("Send Signal", key="signal"):
-        print("Signal")
-        #Do nothing yet
+        res = detect(image, detection)
+
+        if res:
+            print("Do something")
+
+        time.sleep(3)
+
+
 picam.close()
 
             

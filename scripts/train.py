@@ -10,8 +10,6 @@ import json
 from pathlib import Path
 import datetime
 from typing import Dict, Tuple
-import argparse
-from PIL import Image
 
 import timm
 from timm.data import ImageDataset as IDataset
@@ -23,10 +21,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from torch.amp import autocast
 from torch.cuda.amp import GradScaler
-from torcheval.metrics import BinaryAccuracy, MulticlassAccuracy, BinaryNormalizedEntropy
+from torcheval.metrics import MulticlassAccuracy
 from torchvision import transforms
 import torchvision.transforms.functional as TF
-import torchvision.transforms as T
 from torchvision.utils import save_image
 from torch import Tensor
 
