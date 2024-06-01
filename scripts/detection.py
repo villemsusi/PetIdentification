@@ -3,7 +3,7 @@ from PIL import Image
 from pathlib import Path
 from datetime import datetime
 
-from scripts.helper.funcs import write_logs
+from helper.funcs import write_logs
 
 
 def setup_model():

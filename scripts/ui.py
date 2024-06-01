@@ -5,9 +5,9 @@ import time
 
 from train import model_train
 from cam import camera_setup, capture
-from scripts.detection import detect, setup_model
-from scripts.prediction import inference
-from scripts.helper.funcs import read_logs
+from detection import detect, setup_model
+from prediction import inference
+from helper.funcs import read_logs
 
 @st.cache_resource
 def start_cam():
