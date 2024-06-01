@@ -3,9 +3,7 @@ from PIL import Image
 from pathlib import Path
 from datetime import datetime
 
-def write_logs(data):
-    with open("logs/capture_log.txt", "a") as f:
-        f.write(str(data) + "\n")
+from scripts.helper.funcs import write_logs
 
 
 def setup_model():
@@ -22,8 +20,8 @@ def detect(img, model):
         _time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
         img.save(f"logs/images/{_time}.jpg")
         write_logs(_time)
-        return True
-    return False
+        return [True, img]
+    return [False, img]
 
 def file_detect(img, model):
     source_dir = Path(__file__).resolve().parent.parent

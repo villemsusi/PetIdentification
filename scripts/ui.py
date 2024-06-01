@@ -6,6 +6,8 @@ import time
 from train import model_train
 from cam import camera_setup, capture
 from scripts.detection import detect, setup_model
+from scripts.prediction import inference
+from scripts.helper.funcs import read_logs
 
 @st.cache_resource
 def start_cam():
@@ -16,13 +18,6 @@ def start_cam():
 def detection_model():
     detection = setup_model()
     return detection
-
-
-
-def read_logs(amount):
-    with open("logs/capture_log.txt") as f:
-        log_list = f.readlines()
-    return log_list[-amount:][::-1]
 
 
 
@@ -78,12 +73,23 @@ with tab_monitor:
         image = capture(picam)
         STREAM.image(image)
 
-        res = detect(image, detection)
+        res_detect = detect(image, detection)
 
-        if res:
-            print("Do something")
-
-        time.sleep(3)
+        if res_detect[0]:
+            cnt = 0
+            for i in range(10):
+                res_predict = inference("efficientnet_6_3_2.pth", res_detect[1], "Correct")
+                if res_predict["Target"][0]==res_predict["Predicted"][0]:
+                    cnt += 1
+                image = capture(picam)
+                res_detect = detect(image, detection)
+                    
+            if cnt >= 7:
+                print("Do something") # Signal to be sent
+            print("COUNT: "+cnt)
+            time.sleep(8) # Total 10 seconds
+        else:
+            time.sleep(3) # Total 5 seconds
 
 
 picam.close()
