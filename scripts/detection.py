@@ -15,7 +15,7 @@ def detect(img, model):
     results = model(img)
     res = results.pandas().xyxy[0]
     if len(res.name) > 0:
-        img = img.crop(res.xmin[0]-buf, res.ymin[0]-buf, res.xmax[0]+buf, res.ymax[0]+buf)
+        img = img.crop((res.xmin[0]-buf, res.ymin[0]-buf, res.xmax[0]+buf, res.ymax[0]+buf))
 
         _time = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
         img.save(f"logs/images/{_time}.jpg")

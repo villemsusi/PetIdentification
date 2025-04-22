@@ -45,7 +45,7 @@ with tab_logs:
             line = line.strip()
             with cols[index % nr_cols]:
                 st.write(line)
-                st.image(f"logs/{line}.jpg")
+                st.image(f"logs/images/{line}.jpg")
     
 with tab_train:
     images = st.file_uploader("Upload images", accept_multiple_files=True, type=["png", "jpg", "jpeg"])
@@ -86,7 +86,7 @@ with tab_monitor:
                     
             if cnt >= 7:
                 print("Do something") # Signal to be sent
-            print("COUNT: "+cnt)
+            print("COUNT: "+str(cnt))
             time.sleep(8) # Total 10 seconds
         else:
             time.sleep(3) # Total 5 seconds
